@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GHOST ROOM</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Bebas+Neue&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{--bg:#080a0e;--surface:#0d1117;--surface2:#161b22;--border:#21262d;--accent:#00ff87;--accent2:#ff3860;--accent3:#ffb347;--text:#e6edf3;--muted:#8b949e;--glow:0 0 20px rgba(0,255,135,0.3);--rglow:0 0 20px rgba(255,56,96,0.3);}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;height:100vh;overflow:hidden;}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;background-image:linear-gradient(rgba(0,255,135,0.025) 1px,transparent 1px),linear-gradient(90deg,rgba(0,255,135,0.025) 1px,transparent 1px);background-size:44px 44px;animation:grid 25s linear infinite;}
+@keyframes grid{to{transform:translateY(44px)}}
+body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:999;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.07) 2px,rgba(0,0,0,0.07) 4px);}
+
+/* screens */
+.screen{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:1;transition:opacity 0.4s,transform 0.4s;}
+.screen.hidden{opacity:0;pointer-events:none;transform:scale(0.97);}
+#landing{flex-direction:column;text-align:center;}
+#chatroom{flex-direction:column;align-items:stretch;padding:0;}
+
+/* logo */
+.logo{font-family:'Bebas Neue',sans-serif;font-size:clamp(52px,10vw,110px);letter-spacing:12px;background:linear-gradient(135deg,var(--accent),#00c4ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:glow 3s ease-in-out infinite;line-height:1;}
+@keyframes glow{0%,100%{filter:drop-shadow(0 0 20px rgba(0,255,135,0.4))}50%{filter:drop-shadow(0 0 52px rgba(0,255,135,0.85))}}
+.logo-sub{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:6px;color:var(--muted);margin-top:4px;}
+.tagline{font-size:15px;color:var(--muted);margin:20px 0 40px;font-weight:300;line-height:1.7;}
+.tagline span{color:var(--accent);}
+
+/* buttons */
+.lbtns{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;}
+.btn-primary{background:var(--accent);color:#000;border:none;padding:14px 36px;font-family:'Space Mono',monospace;font-size:13px;font-weight:700;letter-spacing:2px;cursor:pointer;clip-path:polygon(8px 0%,100% 0%,calc(100% - 8px) 100%,0% 100%);transition:all 0.2s;position:relative;overflow:hidden;}
+.btn-primary::before{content:'';position:absolute;inset:0;background:rgba(255,255,255,0.2);transform:translateX(-100%);transition:0.3s;}
+.btn-primary:hover::before{transform:translateX(0)}.btn-primary:hover{box-shadow:var(--glow);transform:translateY(-2px);}
+.btn-outline{background:transparent;color:var(--accent);border:1px solid var(--accent);padding:13px 36px;font-family:'Space Mono',monospace;font-size:13px;font-weight:700;letter-spacing:2px;cursor:pointer;clip-path:polygon(8px 0%,100% 0%,calc(100% - 8px) 100%,0% 100%);transition:all 0.2s;}
+.btn-outline:hover{background:rgba(0,255,135,0.1);box-shadow:var(--glow);transform:translateY(-2px);}
+
+/* chips */
+.chips{display:flex;gap:10px;margin-top:40px;justify-content:center;flex-wrap:wrap;}
+.chip{display:flex;align-items:center;gap:7px;padding:6px 14px;border:1px solid var(--border);background:var(--surface);font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:1px;clip-path:polygon(6px 0%,100% 0%,calc(100% - 6px) 100%,0% 100%);}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--accent);animation:blink 2s ease-in-out infinite;}
+.dot.r{background:var(--accent2);}.dot.y{background:var(--accent3);}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.3}}
+
+/* panel */
+.panel{background:var(--surface);border:1px solid var(--border);padding:40px 44px;width:100%;max-width:460px;position:relative;overflow-y:auto;max-height:92vh;}
+.panel::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--accent) 50%,transparent);}
+.ptitle{font-family:'Bebas Neue',sans-serif;font-size:34px;letter-spacing:4px;color:var(--accent);margin-bottom:4px;}
+.psub{font-family:'Space Mono',monospace;font-size:11px;color:var(--muted);margin-bottom:28px;}
+.fg{margin-bottom:20px;}
+.fl{font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;display:block;}
+.fi{width:100%;background:var(--surface2);border:1px solid var(--border);border-bottom:2px solid var(--accent);color:var(--text);padding:12px 16px;font-family:'Space Mono',monospace;font-size:14px;outline:none;transition:all 0.2s;}
+.fi:focus{border-color:var(--accent);}.fi::placeholder{color:var(--border);}
+.og{display:grid;gap:8px;margin-bottom:6px;}.og.c3{grid-template-columns:repeat(3,1fr)}.og.c4{grid-template-columns:repeat(4,1fr)}
+.ob{padding:10px 6px;border:1px solid var(--border);background:var(--surface2);color:var(--muted);font-family:'Space Mono',monospace;font-size:11px;text-align:center;cursor:pointer;transition:all 0.2s;}
+.ob:hover,.ob.on{border-color:var(--accent);color:var(--accent);background:rgba(0,255,135,0.08);}
+.back-btn{background:none;border:none;color:var(--muted);font-family:'Space Mono',monospace;font-size:11px;cursor:pointer;letter-spacing:1px;margin-bottom:22px;display:flex;align-items:center;gap:6px;transition:color 0.2s;}
+.back-btn:hover{color:var(--accent);}
+
+/* key box */
+.kbox{background:var(--bg);border:1px solid var(--accent);padding:18px 22px;margin:22px 0;text-align:center;position:relative;}
+.kval{font-family:'Space Mono',monospace;font-size:26px;color:var(--accent);letter-spacing:8px;font-weight:700;}
+.khint{font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);margin-top:6px;letter-spacing:1px;}
+.copy-btn{position:absolute;top:8px;right:8px;background:none;border:1px solid var(--border);color:var(--muted);padding:4px 8px;font-size:10px;font-family:'Space Mono',monospace;cursor:pointer;transition:all 0.2s;}
+.copy-btn:hover{border-color:var(--accent);color:var(--accent);}
+
+/* chat header */
+.chdr{display:flex;align-items:center;justify-content:space-between;padding:0 20px;border-bottom:1px solid var(--border);background:var(--surface);position:relative;z-index:10;height:56px;flex-shrink:0;}
+.chdr::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--accent),transparent);}
+.rinfo{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.rlogo{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:3px;color:var(--accent);}
+.badge{display:flex;align-items:center;gap:6px;background:var(--surface2);border:1px solid var(--border);padding:4px 10px;font-family:'Space Mono',monospace;font-size:11px;color:var(--muted);}
+.ldot{width:6px;height:6px;border-radius:50%;background:var(--accent);animation:blink 1.5s infinite;}
+.alias-pill{font-family:'Space Mono',monospace;font-size:10px;color:var(--accent);background:rgba(0,255,135,0.06);border:1px solid rgba(0,255,135,0.2);padding:4px 10px;}
+.ctrls{display:flex;align-items:center;gap:8px;}
+.timer-disp{font-family:'Space Mono',monospace;font-size:12px;padding:4px 10px;border:1px solid var(--accent3);color:var(--accent3);background:rgba(255,179,71,0.08);}
+.timer-disp.urg{border-color:var(--accent2);color:var(--accent2);animation:urgblink 0.5s infinite;}
+@keyframes urgblink{0%,100%{opacity:1}50%{opacity:0.5}}
+.destroy-btn{background:rgba(255,56,96,0.1);border:1px solid var(--accent2);color:var(--accent2);padding:6px 14px;font-family:'Space Mono',monospace;font-size:11px;cursor:pointer;letter-spacing:1px;transition:all 0.2s;}
+.destroy-btn:hover{background:var(--accent2);color:#fff;box-shadow:var(--rglow);}
+
+/* messages */
+.msgs{overflow-y:auto;padding:16px 20px;display:flex;flex-direction:column;gap:6px;scroll-behavior:smooth;flex:1;}
+.msgs::-webkit-scrollbar{width:3px;}.msgs::-webkit-scrollbar-thumb{background:var(--border);}
+.mw{display:flex;flex-direction:column;max-width:70%;animation:msgin 0.2s ease both;}
+@keyframes msgin{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.mw.me{align-self:flex-end;align-items:flex-end;}.mw.them{align-self:flex-start;align-items:flex-start;}
+.mm{font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);margin-bottom:4px;letter-spacing:1px;}
+.mb{padding:10px 14px;font-size:14px;line-height:1.55;word-break:break-word;}
+.me .mb{background:rgba(0,255,135,0.1);border:1px solid rgba(0,255,135,0.25);border-radius:12px 12px 2px 12px;}
+.them .mb{background:var(--surface2);border:1px solid var(--border);border-radius:12px 12px 12px 2px;}
+.sys-msg{text-align:center;font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:2px;padding:6px;border-top:1px solid var(--border);border-bottom:1px solid var(--border);margin:4px 0;}
+.typing{font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);padding:2px 20px;min-height:20px;}
+
+/* media */
+.mimg{max-width:260px;max-height:200px;border-radius:8px;object-fit:cover;cursor:pointer;border:1px solid var(--border);display:block;transition:transform 0.2s;}
+.mimg:hover{transform:scale(1.02);}
+.mvid{max-width:260px;border-radius:8px;border:1px solid var(--border);display:block;}
+.fcard{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;min-width:190px;max-width:270px;}
+.ficon{width:38px;height:38px;background:rgba(0,255,135,0.08);border:1px solid rgba(0,255,135,0.2);display:flex;align-items:center;justify-content:center;font-size:17px;border-radius:6px;flex-shrink:0;}
+.fmeta{flex:1;overflow:hidden;}
+.fn{font-size:12px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.fz{font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);margin-top:2px;}
+.fbtns{display:flex;flex-direction:column;gap:4px;flex-shrink:0;}
+.fib{width:26px;height:26px;background:rgba(0,255,135,0.07);border:1px solid rgba(0,255,135,0.2);color:var(--accent);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:12px;border-radius:4px;transition:all 0.2s;text-decoration:none;}
+.fib:hover{background:rgba(0,255,135,0.2);}
+.acard{display:flex;align-items:center;gap:10px;min-width:180px;}
+.aplay{width:34px;height:34px;border-radius:50%;background:var(--accent);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#000;font-weight:bold;flex-shrink:0;transition:all 0.2s;}
+.aplay:hover{transform:scale(1.1);}
+.awv{display:flex;align-items:center;gap:2px;flex:1;}
+.wbar{width:3px;background:rgba(0,255,135,0.45);border-radius:2px;animation:wav 1s ease-in-out infinite;}
+@keyframes wav{0%,100%{height:4px}50%{height:16px}}
+.adur{font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);}
+
+/* upload progress */
+.uprog{padding:10px 14px;background:var(--surface2);border:1px solid rgba(0,255,135,0.3);border-radius:8px;min-width:200px;}
+.uplbl{font-family:'Space Mono',monospace;font-size:10px;color:var(--accent);display:block;margin-bottom:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:190px;}
+.upbar{height:3px;background:var(--border);border-radius:2px;overflow:hidden;margin-bottom:4px;}
+.upfill{height:100%;background:linear-gradient(90deg,var(--accent),#00c4ff);transition:width 0.2s;width:0%;}
+.uppct{font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);}
+
+/* input area */
+.iarea{border-top:1px solid var(--border);background:var(--surface);padding:12px 18px;flex-shrink:0;}
+.recbar{display:none;align-items:center;gap:10px;padding:7px 10px;background:rgba(255,56,96,0.08);border:1px solid var(--accent2);margin-bottom:8px;font-family:'Space Mono',monospace;font-size:11px;color:var(--accent2);}
+.recbar.on{display:flex;}.rectim{font-weight:700;min-width:34px;}
+.tbar{display:flex;align-items:center;gap:4px;margin-bottom:8px;}
+.tbtn{width:32px;height:32px;background:none;border:1px solid var(--border);color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;transition:all 0.2s;}
+.tbtn:hover{border-color:var(--accent);color:var(--accent);background:rgba(0,255,135,0.07);}
+.tbtn.recording{border-color:var(--accent2);color:var(--accent2);animation:recpulse 1s infinite;}
+@keyframes recpulse{0%,100%{box-shadow:0 0 0 0 rgba(255,56,96,0.4)}50%{box-shadow:0 0 0 5px rgba(255,56,96,0)}}
+.irow{display:flex;gap:8px;align-items:flex-end;}
+.minp{flex:1;background:var(--surface2);border:1px solid var(--border);border-bottom:2px solid var(--accent);color:var(--text);padding:10px 14px;font-family:'DM Sans',sans-serif;font-size:14px;outline:none;resize:none;max-height:110px;min-height:42px;line-height:1.5;transition:border-color 0.2s;}
+.minp:focus{border-color:var(--accent);}.minp::placeholder{color:var(--border);}
+.sbtn{width:42px;height:42px;background:var(--accent);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:17px;color:#000;clip-path:polygon(6px 0%,100% 0%,calc(100% - 6px) 100%,0% 100%);transition:all 0.2s;flex-shrink:0;}
+.sbtn:hover{box-shadow:var(--glow);transform:scale(1.05);}
+
+/* overlays */
+#lb{position:fixed;inset:0;background:rgba(0,0,0,0.97);display:flex;align-items:center;justify-content:center;z-index:500;opacity:0;pointer-events:none;transition:opacity 0.3s;}
+#lb.on{opacity:1;pointer-events:all;}
+#dov{position:fixed;inset:0;background:rgba(0,0,0,0.97);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:1000;opacity:0;pointer-events:none;transition:opacity 0.5s;}
+#dov.on{opacity:1;pointer-events:all;}
+.dtitle{font-family:'Bebas Neue',sans-serif;font-size:72px;letter-spacing:14px;color:var(--accent2);filter:drop-shadow(0 0 40px rgba(255,56,96,0.8));animation:destpulse 0.5s infinite;}
+@keyframes destpulse{0%,100%{letter-spacing:14px}50%{letter-spacing:20px}}
+.dsub{font-family:'Space Mono',monospace;font-size:13px;color:var(--muted);margin-top:12px;letter-spacing:3px;}
+
+/* toast */
+.toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(12px);background:var(--surface2);border:1px solid var(--accent);color:var(--accent);padding:8px 20px;font-family:'Space Mono',monospace;font-size:11px;letter-spacing:1px;opacity:0;transition:all 0.3s;pointer-events:none;z-index:998;}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0);}.toast.err{border-color:var(--accent2);color:var(--accent2);}
+
+/* loader */
+#loader{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:2000;transition:opacity 0.5s;}
+#loader.hide{opacity:0;pointer-events:none;}
+.ll{font-family:'Bebas Neue',sans-serif;font-size:60px;letter-spacing:12px;background:linear-gradient(135deg,var(--accent),#00c4ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:glow 1.5s infinite;}
+.ls{font-family:'Space Mono',monospace;font-size:11px;color:var(--muted);letter-spacing:4px;margin-top:10px;}
+
+/* Sai Tech logo badge */
+#saitech{position:fixed;top:18px;right:18px;z-index:998;text-decoration:none;display:flex;align-items:center;gap:7px;padding:7px 13px;background:rgba(8,10,14,0.85);border:1px solid rgba(0,255,135,0.25);backdrop-filter:blur(10px);transition:all 0.25s;cursor:pointer;}
+#saitech:hover{border-color:var(--accent);box-shadow:0 0 18px rgba(0,255,135,0.2);transform:translateY(2px);}
+#saitech::before{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--accent),transparent);opacity:0;transition:opacity 0.25s;}
+#saitech:hover::before{opacity:1;}
+.st-icon{font-size:13px;animation:blink 2s ease-in-out infinite;}
+.st-text{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:2px;background:linear-gradient(135deg,var(--accent),#00c4ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;font-weight:700;}
+
+@media(max-width:600px){
+  .panel{padding:26px 18px;max-height:100vh;border-radius:0;}
+  .msgs{padding:10px 12px;}
+  .iarea{padding:10px 12px;}
+  .chdr{padding:0 12px;height:auto;min-height:52px;flex-wrap:wrap;gap:6px;padding:8px 12px;}
+  .mw{max-width:86%;}
+  .logo{letter-spacing:6px;}
+}
+</style>
+</head>
+<body>
+
+<div id="loader"><div class="ll">GHOST ROOM</div><div class="ls">connecting...</div></div>
+
+<!-- LANDING -->
+<div class="screen hidden" id="landing">
+  <div style="text-align:center;z-index:2;padding:20px;">
+    <div class="logo">GHOST ROOM</div>
+    <div class="logo-sub">ENCRYPTED · EPHEMERAL · UNTRACEABLE</div>
+    <p class="tagline">Create a room. Share the key. <span>Chat freely.</span><br>When it's over — it vanishes.</p>
+    <div class="lbtns">
+      <button class="btn-primary" onclick="go('create')">⬡ Create Room</button>
+      <button class="btn-outline" onclick="go('join')">◈ Join Room</button>
+    </div>
+    <div class="chips">
+      <div class="chip"><span class="dot"></span>Real-time</div>
+      <div class="chip"><span class="dot r"></span>Self-Destruct</div>
+      <div class="chip"><span class="dot y"></span>All Media</div>
+      <div class="chip"><span class="dot"></span>Zero Logs</div>
+    </div>
+  </div>
+</div>
+
+<!-- CREATE -->
+<div class="screen hidden" id="create">
+  <div class="panel">
+    <button class="back-btn" onclick="go('landing')">← BACK</button>
+    <div class="ptitle">Create Room</div>
+    <div class="psub">// configure your ghost room</div>
+    <div class="fg"><label class="fl">Your Alias</label><input class="fi" id="cAlias" placeholder="ghost_01" maxlength="20"></div>
+    <div class="fg">
+      <label class="fl">Auto-Destroy Timer</label>
+      <div class="og c3" id="tG">
+        <div class="ob on" onclick="pick(this,'tG',0)">No Timer</div>
+        <div class="ob" onclick="pick(this,'tG',600)">10 min</div>
+        <div class="ob" onclick="pick(this,'tG',1800)">30 min</div>
+        <div class="ob" onclick="pick(this,'tG',3600)">1 hour</div>
+        <div class="ob" onclick="pick(this,'tG',14400)">4 hours</div>
+        <div class="ob" onclick="pick(this,'tG',86400)">24 hrs</div>
+      </div>
+    </div>
+    <div class="fg">
+      <label class="fl">Inactivity Destroy</label>
+      <div class="og c4" id="iG">
+        <div class="ob on" onclick="pick(this,'iG',0)">Never</div>
+        <div class="ob" onclick="pick(this,'iG',1800)">30 min</div>
+        <div class="ob" onclick="pick(this,'iG',3600)">1 hr</div>
+        <div class="ob" onclick="pick(this,'iG',21600)">6 hrs</div>
+      </div>
+    </div>
+    <div class="fg">
+      <label class="fl">Max Members</label>
+      <div class="og c4" id="mG">
+        <div class="ob" onclick="pick(this,'mG',2)">2</div>
+        <div class="ob on" onclick="pick(this,'mG',5)">5</div>
+        <div class="ob" onclick="pick(this,'mG',10)">10</div>
+        <div class="ob" onclick="pick(this,'mG',999)">∞</div>
+      </div>
+    </div>
+    <button class="btn-primary" style="width:100%;clip-path:none;" onclick="createRoom()">Generate Room Key →</button>
+    <div id="krev" style="display:none;">
+      <div class="kbox">
+        <button class="copy-btn" onclick="copyKey()">COPY</button>
+        <div class="kval" id="kval">----</div>
+        <div class="khint">share this key with your contact</div>
+      </div>
+      <button class="btn-primary" style="width:100%;clip-path:none;" onclick="enterRoom()">Enter Room →</button>
+    </div>
+  </div>
+</div>
+
+<!-- JOIN -->
+<div class="screen hidden" id="join">
+  <div class="panel">
+    <button class="back-btn" onclick="go('landing')">← BACK</button>
+    <div class="ptitle">Join Room</div>
+    <div class="psub">// enter the key you received</div>
+    <div class="fg"><label class="fl">Your Alias</label><input class="fi" id="jAlias" placeholder="shadow_02" maxlength="20"></div>
+    <div class="fg">
+      <label class="fl">Room Key</label>
+      <input class="fi" id="jKey" placeholder="XXXX-XXXX" maxlength="9" style="letter-spacing:4px;font-size:20px;text-transform:uppercase;" oninput="this.value=this.value.toUpperCase()">
+    </div>
+    <button class="btn-primary" style="width:100%;clip-path:none;" onclick="joinRoom()">Enter Room →</button>
+  </div>
+</div>
+
+<!-- CHATROOM -->
+<div class="screen hidden" id="chatroom">
+  <div style="display:flex;flex-direction:column;height:100vh;width:100%;">
+    <div class="chdr">
+      <div class="rinfo">
+        <div class="rlogo">GHOST</div>
+        <div class="badge"><span class="ldot"></span><span id="kbadge">----</span></div>
+        <div class="badge"><span class="ldot"></span><span id="mcnt">0 members</span></div>
+        <div class="alias-pill" id="alab">--</div>
+      </div>
+      <div class="ctrls">
+        <div class="timer-disp" id="tdisp" style="display:none;">⏱ --:--</div>
+        <button class="destroy-btn" onclick="confirmDestroy()">💀 Destroy</button>
+      </div>
+    </div>
+    <div class="msgs" id="msgs"></div>
+    <div class="typing" id="typingEl"></div>
+    <div class="iarea">
+      <div class="recbar" id="recbar">
+        <span>● REC</span>
+        <span class="rectim" id="rectime">0:00</span>
+        <button onclick="stopRec()" style="margin-left:auto;background:var(--accent2);border:none;color:#fff;padding:4px 12px;font-family:'Space Mono',monospace;font-size:10px;cursor:pointer;letter-spacing:1px;">SEND</button>
+        <button onclick="cancelRec()" style="background:none;border:1px solid var(--border);color:var(--muted);padding:4px 12px;font-family:'Space Mono',monospace;font-size:10px;cursor:pointer;">CANCEL</button>
+      </div>
+      <div class="tbar">
+        <button class="tbtn" onclick="g('imgIn').click()" title="Image">🖼️</button>
+        <button class="tbtn" onclick="g('vidIn').click()" title="Video">🎬</button>
+        <button class="tbtn" onclick="g('fileIn').click()" title="File">📎</button>
+        <button class="tbtn" id="micBtn" onclick="toggleRec()" title="Voice">🎙️</button>
+      </div>
+      <div class="irow">
+        <textarea class="minp" id="msgIn" placeholder="Type anything..." rows="1"
+          onkeydown="onKey(event)" oninput="resizeInp(this);emitTyping()"></textarea>
+        <button class="sbtn" onclick="sendText()">➤</button>
+      </div>
+      <input type="file" id="imgIn"  accept="image/*"   style="display:none" onchange="uploadFile(event,'image')">
+      <input type="file" id="vidIn"  accept="video/*"   style="display:none" onchange="uploadFile(event,'video')">
+      <input type="file" id="fileIn" accept=".pdf,.doc,.docx,.txt,.zip,.rar,.xlsx,.pptx,.csv" style="display:none" onchange="uploadFile(event,'file')">
+    </div>
+  </div>
+</div>
+
+<!-- DESTROYED -->
+<div id="dov">
+  <div class="dtitle">ROOM DESTROYED</div>
+  <div class="dsub" id="dreason">all data has been wiped</div>
+  <button class="btn-outline" style="margin-top:30px;" onclick="resetApp()">← Start Over</button>
+</div>
+
+<!-- LIGHTBOX -->
+<div id="lb" onclick="closeLb()">
+  <div onclick="event.stopPropagation()" style="display:flex;flex-direction:column;align-items:center;gap:10px;">
+    <img id="lbimg" src="" style="max-width:90vw;max-height:82vh;object-fit:contain;border:1px solid var(--border);">
+    <div style="display:flex;gap:10px;">
+      <a id="lbdl" href="#" target="_blank" class="fib" style="width:auto;padding:6px 16px;font-family:'Space Mono',monospace;font-size:11px;letter-spacing:1px;text-decoration:none;">⬇ DOWNLOAD</a>
+      <button onclick="closeLb()" style="background:rgba(255,56,96,0.1);border:1px solid var(--accent2);color:var(--accent2);padding:6px 16px;font-family:'Space Mono',monospace;font-size:11px;cursor:pointer;">✕ CLOSE</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- Sai Tech Logo -->
+<a id="saitech" href="https://saiyam-creator.github.io/portfolio/" target="_blank" title="Made by Sai Tech">
+  <span class="st-icon">⚡</span>
+  <span class="st-text">SAI TECH</span>
+</a>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+//  SUPABASE CONFIG — hardcoded
+// ═══════════════════════════════════════════════════════════
+const SUPA_URL = 'https://hzufxbgmsbfnejkkcogb.supabase.co';
+const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh6dWZ4Ymdtc2JmbmVqa2tjb2diIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMzMjgzMDIsImV4cCI6MjA4ODkwNDMwMn0.qrh8sFILdacGhNmMhk2oFhEnCfLiBdDaOEb7f5KQhRs';
+const BUCKET   = 'ghostroom';
+
+const sb = supabase.createClient(SUPA_URL, SUPA_KEY);
+
+// ═══════════════════════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════════════════════
+const S = {
+  key:null, alias:null, timer:0, inact:0, maxM:5,
+  rem:0, tInt:null,
+  rec:false, rInt:null, rSecs:0, recorder:null, chunks:[],
+  msgSub:null, roomSub:null
+};
+const picks = { tG:0, iG:0, mG:5 };
+
+// ═══════════════════════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════════════════════
+window.addEventListener('load', () => {
+  setTimeout(() => { g('loader').classList.add('hide'); go('landing'); }, 600);
+});
+
+// ═══════════════════════════════════════════════════════════
+//  HELPERS
+// ═══════════════════════════════════════════════════════════
+const g    = id => document.getElementById(id);
+const mk   = (t,c) => { const e=document.createElement(t); if(c)e.className=c; return e; };
+const ftT  = ts => new Date(ts).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+const ftD  = s  => Math.floor(s/60)+':'+String(s%60).padStart(2,'0');
+const ftSz = b  => b<1048576?(b/1024).toFixed(1)+' KB':(b/1048576).toFixed(1)+' MB';
+const fIco = n  => ({pdf:'📄',doc:'📝',docx:'📝',txt:'📃',zip:'📦',rar:'📦',csv:'📊',xlsx:'📊',pptx:'📋'}[(n||'').split('.').pop().toLowerCase()]||'📎');
+const scrollB = () => { const m=g('msgs'); if(m) m.scrollTop=m.scrollHeight; };
+const rnd  = () => Math.floor(Math.random()*90)+10;
+
+let toastTmr;
+function toast(msg, err=false) {
+  const t = g('toast');
+  t.textContent = msg;
+  t.className   = 'toast'+(err?' err':'');
+  t.classList.add('on');
+  clearTimeout(toastTmr);
+  toastTmr = setTimeout(() => t.classList.remove('on'), 3200);
+}
+
+function go(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+  g(id).classList.remove('hidden');
+  // Hide Sai Tech logo inside chatroom
+  const logo = g('saitech');
+  if (logo) logo.style.display = id === 'chatroom' ? 'none' : 'flex';
+}
+function pick(el, grp, val) {
+  g(grp).querySelectorAll('.ob').forEach(b => b.classList.remove('on'));
+  el.classList.add('on');
+  picks[grp] = val;
+}
+
+function genKey() {
+  const c = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let k = '';
+  for (let i=0;i<8;i++) { if(i===4) k+='-'; k+=c[Math.floor(Math.random()*c.length)]; }
+  return k;
+}
+
+// ═══════════════════════════════════════════════════════════
+//  CREATE ROOM
+// ═══════════════════════════════════════════════════════════
+async function createRoom() {
+  const alias = g('cAlias').value.trim() || 'Ghost_'+rnd();
+  const key   = genKey();
+
+  const { error } = await sb.from('rooms').insert({
+    key,
+    creator:          alias,
+    timer_duration:   picks.tG,
+    inactivity_limit: picks.iG,
+    member_limit:     picks.mG,
+    members:          [alias],
+    active:           true,
+    last_act:         Date.now()
+  });
+
+  if (error) { toast('Error: '+error.message, true); return; }
+
+  S.key=key; S.alias=alias; S.timer=picks.tG; S.inact=picks.iG; S.maxM=picks.mG;
+  g('kval').textContent = key;
+  g('krev').style.display = 'block';
+  toast('Room created! Share the key 🔑');
+}
+
+function copyKey() {
+  navigator.clipboard?.writeText(S.key).then(() => toast('Key copied!'))
+    .catch(() => { const t=mk('textarea'); t.value=S.key; document.body.appendChild(t); t.select(); document.execCommand('copy'); document.body.removeChild(t); toast('Key copied!'); });
+}
+
+// ═══════════════════════════════════════════════════════════
+//  JOIN ROOM
+// ═══════════════════════════════════════════════════════════
+async function joinRoom() {
+  const alias = g('jAlias').value.trim() || 'Shadow_'+rnd();
+  const key   = g('jKey').value.trim().toUpperCase().replace(/[^A-Z0-9-]/g,'');
+  if (key.length < 8) { toast('Valid room key enter karo!', true); return; }
+
+  const { data:room, error } = await sb.from('rooms').select('*').eq('key',key).eq('active',true).single();
+  if (error||!room) { toast('Room nahi mila ya destroy ho gaya!', true); return; }
+  if (room.members.length >= room.member_limit) { toast('Room full hai!', true); return; }
+
+  // Add member
+  const members = [...new Set([...room.members, alias])];
+  await sb.from('rooms').update({ members, last_act:Date.now() }).eq('key',key);
+
+  S.key=key; S.alias=alias; S.timer=room.timer_duration; S.inact=room.inactivity_limit; S.maxM=room.member_limit;
+  enterRoom();
+}
+
+// ═══════════════════════════════════════════════════════════
+//  ENTER ROOM
+// ═══════════════════════════════════════════════════════════
+async function enterRoom() {
+  go('chatroom');
+  g('kbadge').textContent = S.key;
+  g('alab').textContent   = '🔒 '+S.alias.toUpperCase();
+  g('msgs').innerHTML     = '';
+
+  // Timer
+  if (S.timer > 0) {
+    S.rem = S.timer;
+    g('tdisp').style.display = 'block';
+    updTimer();
+    S.tInt = setInterval(() => {
+      S.rem--;
+      updTimer();
+      if (S.rem <= 0) destroyRoom('Timer expired');
+    }, 1000);
+  }
+
+  // Load old messages
+  const { data:msgs } = await sb.from('messages').select('*').eq('room_key',S.key).order('ts',{ascending:true}).limit(200);
+  if (msgs) msgs.forEach(m => renderMsg(m));
+  scrollB();
+
+  // Subscribe realtime — messages
+  S.msgSub = sb.channel('msgs_'+S.key)
+    .on('postgres_changes', { event:'INSERT', schema:'public', table:'messages', filter:`room_key=eq.${S.key}` },
+      payload => { renderMsg(payload.new); scrollB(); })
+    .subscribe();
+
+  // Subscribe realtime — room (destroy/member changes)
+  S.roomSub = sb.channel('room_'+S.key)
+    .on('postgres_changes', { event:'UPDATE', schema:'public', table:'rooms', filter:`key=eq.${S.key}` },
+      payload => {
+        const r = payload.new;
+        if (!r.active) { destroyRoom('Room was destroyed'); return; }
+        g('mcnt').textContent = r.members.length+' member'+(r.members.length!==1?'s':'');
+      })
+    .subscribe();
+
+  sysMsg(S.alias+' joined the ghost room');
+  updateMemberCount();
+  g('msgIn').focus();
+}
+
+async function updateMemberCount() {
+  const { data } = await sb.from('rooms').select('members').eq('key',S.key).single();
+  if (data) g('mcnt').textContent = data.members.length+' member'+(data.members.length!==1?'s':'');
+}
+
+function updTimer() {
+  const m=Math.floor(S.rem/60), s=S.rem%60;
+  const el = g('tdisp');
+  el.textContent = '⏱ '+m+':'+String(s).padStart(2,'0');
+  el.classList.toggle('urg', S.rem < 120);
+}
+
+// ═══════════════════════════════════════════════════════════
+//  SEND TEXT
+// ═══════════════════════════════════════════════════════════
+async function sendText() {
+  const inp  = g('msgIn');
+  const text = inp.value.trim();
+  if (!text) return;
+  inp.value = ''; inp.style.height='42px'; inp.focus();
+  await pushMsg({ type:'text', content:text });
+}
+function onKey(e) { if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendText();} }
+function resizeInp(el) { el.style.height='42px'; el.style.height=Math.min(el.scrollHeight,110)+'px'; }
+
+let typingTmr;
+async function emitTyping() {
+  clearTimeout(typingTmr);
+  // Use Supabase Broadcast for typing indicator
+  await sb.channel('typing_'+S.key).send({ type:'broadcast', event:'typing', payload:{ alias:S.alias } }).catch(()=>{});
+  typingTmr = setTimeout(()=>{}, 2000);
+}
+
+async function pushMsg(extra) {
+  const msg = { room_key:S.key, sender:S.alias, ts:Date.now(), ...extra };
+  const { error } = await sb.from('messages').insert(msg);
+  if (error) toast('Send failed: '+error.message, true);
+  // Update last activity
+  await sb.from('rooms').update({ last_act:Date.now() }).eq('key',S.key);
+}
+
+// ═══════════════════════════════════════════════════════════
+//  FILE UPLOAD → Supabase Storage
+// ═══════════════════════════════════════════════════════════
+async function uploadFile(e, type) {
+  const file = e.target.files[0];
+  e.target.value = '';
+  if (!file) return;
+
+  const maxMB = type==='video' ? 100 : 25;
+  if (file.size > maxMB*1024*1024) { toast('File too large! Max '+maxMB+'MB', true); return; }
+
+  const pid   = 'up_'+Date.now();
+  addProg(pid, file.name);
+  toast('Uploading '+file.name+'...');
+
+  const ext      = file.name.split('.').pop();
+  const filePath = `${S.key}/${Date.now()}.${ext}`;
+
+  const { data, error } = await sb.storage.from(BUCKET).upload(filePath, file, {
+    cacheControl: '3600',
+    upsert: false
+  });
+
+  if (error) {
+    g('pw_'+pid)?.remove();
+    toast('Upload failed: '+error.message, true);
+    return;
+  }
+
+  // Get public URL
+  const { data:urlData } = sb.storage.from(BUCKET).getPublicUrl(filePath);
+  const url = urlData.publicUrl;
+
+  g('pw_'+pid)?.remove();
+
+  await pushMsg({
+    type,
+    content: url,
+    fname:   file.name,
+    fsz:     ftSz(file.size)
+  });
+
+  toast('Sent ✓');
+}
+
+function addProg(pid, fname) {
+  const w = mk('div','mw me'); w.id='pw_'+pid;
+  const b = mk('div','mb'); b.style.padding='9px 12px';
+  b.innerHTML = `<div class="uprog">
+    <span class="uplbl">📤 ${fname}</span>
+    <div class="upbar"><div class="upfill" id="uf_${pid}" style="width:60%;animation:progani 1.5s ease-in-out infinite;"></div></div>
+    <span class="uppct">uploading...</span>
+  </div>
+  <style>@keyframes progani{0%{width:20%}50%{width:80%}100%{width:20%}}</style>`;
+  w.appendChild(b);
+  g('msgs').appendChild(w);
+  scrollB();
+}
+
+// ═══════════════════════════════════════════════════════════
+//  VOICE NOTE
+// ═══════════════════════════════════════════════════════════
+async function toggleRec() {
+  if (S.rec) { stopRec(); return; }
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio:true });
+    S.recorder = new MediaRecorder(stream);
+    S.chunks=[]; S.rSecs=0;
+    S.recorder.ondataavailable = e => S.chunks.push(e.data);
+    S.recorder.onstop = async () => {
+      const blob = new Blob(S.chunks, { type:'audio/webm' });
+      const dur  = ftD(S.rSecs);
+      stream.getTracks().forEach(t=>t.stop());
+
+      const pid      = 'up_'+Date.now();
+      addProg(pid, 'voice_note.webm');
+      toast('Uploading voice...');
+
+      const filePath = `${S.key}/voice_${Date.now()}.webm`;
+      const { error } = await sb.storage.from(BUCKET).upload(filePath, blob, { contentType:'audio/webm' });
+      g('pw_'+pid)?.remove();
+      if (error) { toast('Voice failed: '+error.message, true); return; }
+
+      const { data:urlData } = sb.storage.from(BUCKET).getPublicUrl(filePath);
+      await pushMsg({ type:'audio', content:urlData.publicUrl, duration:dur });
+      toast('Voice sent ✓');
+    };
+    S.recorder.start();
+    S.rec=true; g('micBtn').classList.add('recording'); g('recbar').classList.add('on');
+    S.rInt = setInterval(() => { S.rSecs++; g('rectime').textContent=ftD(S.rSecs); }, 1000);
+  } catch(e) { toast('Mic access denied', true); }
+}
+function stopRec() {
+  if(!S.rec) return;
+  S.recorder.stop(); S.rec=false; clearInterval(S.rInt);
+  g('micBtn').classList.remove('recording'); g('recbar').classList.remove('on');
+}
+function cancelRec() {
+  if(!S.rec) return;
+  S.chunks=[]; S.recorder.onstop=()=>{};
+  S.recorder.stop(); try{S.recorder.stream.getTracks().forEach(t=>t.stop())}catch(e){}
+  S.rec=false; clearInterval(S.rInt);
+  g('micBtn').classList.remove('recording'); g('recbar').classList.remove('on');
+}
+
+// ═══════════════════════════════════════════════════════════
+//  RENDER MESSAGE
+// ═══════════════════════════════════════════════════════════
+function renderMsg(msg) {
+  const me = msg.sender === S.alias;
+  const w  = mk('div','mw '+(me?'me':'them'));
+  const mm = mk('div','mm');
+  mm.textContent = (me?'YOU':msg.sender.toUpperCase())+' · '+ftT(msg.ts||Date.now());
+  const b = mk('div','mb');
+  const { type, content:src, fname='' } = msg;
+
+  if (type==='text') {
+    b.textContent = src;
+
+  } else if (type==='image') {
+    b.style.cssText='padding:5px;background:none;border:none;';
+    const img = mk('img','mimg'); img.loading='lazy'; img.alt=fname;
+    img.onerror=()=>{ b.textContent='[Image]'; };
+    img.onclick=()=>openLb(src,fname);
+    img.src=src; b.appendChild(img);
+
+  } else if (type==='video') {
+    b.style.cssText='padding:5px;background:none;border:none;';
+    const vid=mk('video','mvid'); vid.controls=true; vid.preload='metadata'; vid.src=src;
+    const dl=mk('a','fib'); dl.href=src; dl.target='_blank'; dl.download=fname||'video';
+    dl.style.cssText='margin-top:5px;width:auto;padding:4px 10px;font-family:"Space Mono",monospace;font-size:10px;text-decoration:none;display:inline-flex;align-items:center;letter-spacing:1px;';
+    dl.textContent='⬇ Download'; b.appendChild(vid); b.appendChild(dl);
+
+  } else if (type==='file') {
+    b.style.cssText='padding:0;background:none;border:none;';
+    const card=mk('div','fcard');
+    const ico=mk('div','ficon'); ico.textContent=fIco(fname);
+    const fm=mk('div','fmeta');
+    fm.innerHTML='<div class="fn">'+fname+'</div><div class="fz">'+(msg.fsz||'')+'</div>';
+    const btns=mk('div','fbtns');
+    const ob=mk('button','fib'); ob.textContent='👁'; ob.onclick=()=>openFile(src,fname);
+    const dl=mk('a','fib'); dl.href=src; dl.target='_blank'; dl.download=fname; dl.textContent='⬇';
+    btns.appendChild(ob); btns.appendChild(dl);
+    card.appendChild(ico); card.appendChild(fm); card.appendChild(btns); b.appendChild(card);
+
+  } else if (type==='audio') {
+    b.style.padding='9px 12px';
+    const ac=mk('div','acard');
+    const pb=mk('button','aplay'); pb.textContent='▶';
+    const aud=new Audio(src); let playing=false;
+    pb.onclick=()=>{if(playing){aud.pause();pb.textContent='▶';playing=false;}else{aud.play();pb.textContent='⏸';playing=true;aud.onended=()=>{pb.textContent='▶';playing=false;};}};
+    const wv=mk('div','awv');
+    [7,13,18,10,16,8,14,20,9,13].forEach((h,i)=>{const b2=mk('div','wbar');b2.style.cssText='height:'+h+'px;animation-delay:'+(i*0.1)+'s;';wv.appendChild(b2);});
+    const dur=mk('span','adur'); dur.textContent=msg.duration||'0:00';
+    ac.appendChild(pb); ac.appendChild(wv); ac.appendChild(dur); b.appendChild(ac);
+  }
+
+  w.appendChild(mm); w.appendChild(b);
+  g('msgs').appendChild(w);
+}
+
+function sysMsg(t) {
+  const el=mk('div','sys-msg'); el.textContent=t; g('msgs').appendChild(el); scrollB();
+}
+
+// ═══════════════════════════════════════════════════════════
+//  DESTROY ROOM
+// ═══════════════════════════════════════════════════════════
+function confirmDestroy() {
+  if (confirm('Destroy this room permanently? Sab kuch delete ho jaayega.')) destroyRoom('Room manually destroyed');
+}
+
+async function destroyRoom(reason) {
+  clearInterval(S.tInt);
+  if (S.msgSub)  sb.removeChannel(S.msgSub);
+  if (S.roomSub) sb.removeChannel(S.roomSub);
+
+  // Mark inactive, delete messages & files
+  await sb.from('rooms').update({ active:false }).eq('key',S.key);
+  await sb.from('messages').delete().eq('room_key',S.key);
+
+  g('dreason').textContent = reason;
+  g('dov').classList.add('on');
+}
+
+function resetApp() {
+  Object.assign(S,{key:null,alias:null,timer:0,inact:0,maxM:5,rem:0,tInt:null,rec:false,rInt:null,rSecs:0,recorder:null,chunks:[],msgSub:null,roomSub:null});
+  g('dov').classList.remove('on'); g('msgs').innerHTML=''; g('tdisp').style.display='none';
+  g('cAlias').value=''; g('jAlias').value=''; g('jKey').value=''; g('krev').style.display='none';
+  go('landing');
+}
+
+// ═══════════════════════════════════════════════════════════
+//  LIGHTBOX / FILE OPEN
+// ═══════════════════════════════════════════════════════════
+function openLb(src,name){ g('lbimg').src=src; g('lbdl').href=src; g('lb').classList.add('on'); }
+function closeLb(){ g('lb').classList.remove('on'); }
+function openFile(src,name){
+  const ext=(name||'').split('.').pop().toLowerCase();
+  if(ext==='pdf'){ window.open(src,'_blank'); }
+  else{ const a=mk('a'); a.href=src; a.target='_blank'; a.click(); }
+}
+document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeLb(); });
+</script>
+</body>
+</html>
