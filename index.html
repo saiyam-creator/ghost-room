@@ -325,7 +325,7 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:999;ba
     <div class="stats-row">
       <div class="stat-box"><div class="stat-num">0</div><div class="stat-lbl">Data Stored</div></div>
       <div class="stat-box"><div class="stat-num">∞</div><div class="stat-lbl">Rooms Possible</div></div>
-      <div class="stat-box"><div class="stat-num">1</div><div class="stat-lbl"> File</div></div>
+      <div class="stat-box"><div class="stat-num">1</div><div class="stat-lbl">HTML File</div></div>
       <div class="stat-box"><div class="stat-num">💀</div><div class="stat-lbl">Self Destructs</div></div>
     </div>
   </div>
@@ -403,9 +403,9 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:999;ba
           Always learning, always building — one project at a time.
         </p>
         <div class="founder-links">
-          <a href="https://www.instagram.com/saiiyam_jain/" target="_blank" class="flink"><span class="flink-icon">📸</span> Instagram</a>
-          <a href="https://www.linkedin.com/in/saiyam-jain-68094a292/" target="_blank" class="flink"><span class="flink-icon">💼</span> LinkedIn</a>
-          <a href="https://github.com/saiyam-creator" target="_blank" class="flink"><span class="flink-icon">💻</span> GitHub</a>
+          <a href="YOUR_INSTAGRAM_LINK" target="_blank" class="flink"><span class="flink-icon">📸</span> Instagram</a>
+          <a href="YOUR_LINKEDIN_LINK" target="_blank" class="flink"><span class="flink-icon">💼</span> LinkedIn</a>
+          <a href="YOUR_GITHUB_LINK" target="_blank" class="flink"><span class="flink-icon">💻</span> GitHub</a>
           <a href="https://saiyam-creator.github.io/portfolio/" target="_blank" class="flink"><span class="flink-icon">🌐</span> Portfolio</a>
         </div>
       </div>
@@ -990,86 +990,106 @@ function openFile(src,name){
 document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeLb(); });
 
 // ═══════════════════════════════════════════════════════════
-//  PARTICLES
+//  MATRIX CODE RAIN
 // ═══════════════════════════════════════════════════════════
 (function(){
   const canvas = g('particles');
   if (!canvas) return;
   const ctx = canvas.getContext('2d');
-  let W, H, particles = [];
+  let W, H, cols, drops, glowDrops;
 
-  function resize(){
+  // Characters: mix of binary, symbols, katakana-ish, hex
+  const CHARS = '01アイウエオカキクケコ0110ᛒᚷᚹᚾ⌘⊕⊗∞∅◈⬡★⚡{}[]<>01ABCDEFサシスセソ1001∇∆ΦΨΩ0101';
+
+  const FONT_SIZE = 14;
+  let mouse = { x: -999, y: -999 };
+  let lastTime = 0;
+  const INTERVAL = 60; // ms between frames — higher = slower
+
+  function resize() {
     W = canvas.width  = window.innerWidth;
     H = canvas.height = window.innerHeight;
+    cols = Math.floor(W / FONT_SIZE);
+    drops = Array(cols).fill(0).map(() => Math.random() * -100);
+    glowDrops = new Set();
+    // Randomly mark some cols as glow (bright head)
+    for (let i = 0; i < cols; i++) {
+      if (Math.random() < 0.15) glowDrops.add(i);
+    }
   }
   resize();
   window.addEventListener('resize', resize);
 
-  const COLORS = ['rgba(0,255,135,', 'rgba(0,196,255,', 'rgba(0,255,135,'];
+  // Track mouse for hover ripple
+  document.addEventListener('mousemove', e => { mouse.x = e.clientX; mouse.y = e.clientY; });
+  document.addEventListener('mouseleave', () => { mouse.x = -999; mouse.y = -999; });
 
-  function mkP(){
-    return {
-      x: Math.random() * W,
-      y: Math.random() * H,
-      r: Math.random() * 1.8 + 0.4,
-      vx: (Math.random() - 0.5) * 0.35,
-      vy: (Math.random() - 0.5) * 0.35,
-      color: COLORS[Math.floor(Math.random()*COLORS.length)],
-      alpha: Math.random() * 0.5 + 0.1,
-      pulse: Math.random() * Math.PI * 2
-    };
-  }
+  // Speed per column — slower & varied
+  const speeds = Array(1000).fill(0).map(() => 0.2 + Math.random() * 0.22);
 
-  for(let i = 0; i < 90; i++) particles.push(mkP());
+  function draw(ts) {
+    requestAnimationFrame(draw);
+    if (ts - lastTime < INTERVAL) return;
+    lastTime = ts;
+    // Smoother fade trail
+    ctx.fillStyle = 'rgba(8,10,14,0.08)';
+    ctx.fillRect(0, 0, W, H);
 
-  function draw(){
-    ctx.clearRect(0, 0, W, H);
-    const t = Date.now() * 0.001;
+    ctx.font = `${FONT_SIZE}px "Space Mono", monospace`;
 
-    // Draw connections
-    for(let i = 0; i < particles.length; i++){
-      for(let j = i+1; j < particles.length; j++){
-        const dx = particles[i].x - particles[j].x;
-        const dy = particles[i].y - particles[j].y;
-        const dist = Math.sqrt(dx*dx + dy*dy);
-        if(dist < 120){
-          ctx.beginPath();
-          ctx.moveTo(particles[i].x, particles[i].y);
-          ctx.lineTo(particles[j].x, particles[j].y);
-          ctx.strokeStyle = `rgba(0,255,135,${0.06 * (1 - dist/120)})`;
-          ctx.lineWidth = 0.5;
-          ctx.stroke();
-        }
+    for (let i = 0; i < cols; i++) {
+      const x = i * FONT_SIZE;
+      const y = drops[i] * FONT_SIZE;
+
+      // Mouse proximity glow burst
+      const dx = x - mouse.x;
+      const dy = y - mouse.y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      const nearMouse = dist < 120;
+
+      // Pick char
+      const ch = CHARS[Math.floor(Math.random() * CHARS.length)];
+
+      if (nearMouse) {
+        // Bright cyan burst near mouse
+        ctx.shadowColor = '#00c4ff';
+        ctx.shadowBlur = 18;
+        ctx.fillStyle = '#ffffff';
+        ctx.fillText(ch, x, y);
+        ctx.shadowBlur = 0;
+      } else if (glowDrops.has(i)) {
+        // Bright glowing head
+        ctx.shadowColor = '#00ff87';
+        ctx.shadowBlur = 12;
+        ctx.fillStyle = '#ccffe8';
+        ctx.fillText(ch, x, y);
+        ctx.shadowBlur = 0;
+      } else {
+        // Normal rain — vary brightness by position
+        const fade = Math.min(1, drops[i] / 20);
+        const alpha = (0.25 + fade * 0.35).toFixed(2);
+        ctx.fillStyle = `rgba(0,255,135,${alpha})`;
+        ctx.fillText(ch, x, y);
+      }
+
+      // Occasional blue/teal accent chars
+      if (Math.random() < 0.004) {
+        ctx.fillStyle = 'rgba(0,196,255,0.5)';
+        ctx.fillText(CHARS[Math.floor(Math.random() * CHARS.length)], x, y - FONT_SIZE * 2);
+      }
+
+      // Reset column when it hits bottom (random stagger)
+      drops[i] += speeds[i];
+      if (drops[i] * FONT_SIZE > H && Math.random() > 0.975) {
+        drops[i] = Math.random() * -50;
+        // Randomly toggle glow
+        if (Math.random() < 0.3) glowDrops.add(i);
+        else glowDrops.delete(i);
       }
     }
 
-    // Draw particles
-    particles.forEach(p => {
-      p.pulse += 0.02;
-      const alpha = p.alpha * (0.7 + 0.3 * Math.sin(p.pulse));
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-      ctx.fillStyle = p.color + alpha + ')';
-      ctx.fill();
-
-      // Tiny glow on bigger particles
-      if(p.r > 1.4){
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.r * 3, 0, Math.PI * 2);
-        ctx.fillStyle = p.color + (alpha * 0.08) + ')';
-        ctx.fill();
-      }
-
-      p.x += p.vx; p.y += p.vy;
-      if(p.x < -10) p.x = W + 10;
-      if(p.x > W + 10) p.x = -10;
-      if(p.y < -10) p.y = H + 10;
-      if(p.y > H + 10) p.y = -10;
-    });
-
-    requestAnimationFrame(draw);
   }
-  draw();
+  requestAnimationFrame(draw);
 })();
 
 </script>
