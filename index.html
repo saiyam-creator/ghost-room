@@ -195,7 +195,7 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:999;ba
 .sec-label::before{content:'';width:30px;height:1px;background:var(--accent);}
 .sec-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(36px,5vw,60px);letter-spacing:4px;color:var(--text);line-height:1.05;margin-bottom:16px;}
 .sec-title span{color:var(--accent);}
-.sec-desc{font-size:16px;color:var(--muted);line-height:1.8;max-width:600px;}
+.sec-desc{font-size:16px;color:var(--muted);line-height:1.8;}
 
 /* features grid */
 .feat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1px;background:var(--border);margin-top:56px;border:1px solid var(--border);}
@@ -325,7 +325,7 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:999;ba
     <div class="stats-row">
       <div class="stat-box"><div class="stat-num">0</div><div class="stat-lbl">Data Stored</div></div>
       <div class="stat-box"><div class="stat-num">∞</div><div class="stat-lbl">Rooms Possible</div></div>
-      <div class="stat-box"><div class="stat-num">1</div><div class="stat-lbl">HTML File</div></div>
+      <div class="stat-box"><div class="stat-num">1</div><div class="stat-lbl">File</div></div>
       <div class="stat-box"><div class="stat-num">💀</div><div class="stat-lbl">Self Destructs</div></div>
     </div>
   </div>
@@ -393,21 +393,27 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:999;ba
         </div>
       </div>
 
-      <div class="founder-card" id="founder">
+      <div class="founder-card" id="founder" style="text-align:center;">
         <div class="about-tag">// THE FOUNDER</div>
-        <div class="founder-avatar">S</div>
-        <div class="founder-name">SAIYAM</div>
+        <div style="display:flex;gap:6px;margin-bottom:20px;flex-wrap:nowrap;justify-content:center;">
+          <div class="founder-avatar" style="width:44px;height:44px;font-size:18px;">S</div>
+          <div class="founder-avatar" style="width:44px;height:44px;font-size:18px;">A</div>
+          <div class="founder-avatar" style="width:44px;height:44px;font-size:18px;">I</div>
+          <div class="founder-avatar" style="width:44px;height:44px;font-size:18px;">Y</div>
+          <div class="founder-avatar" style="width:44px;height:44px;font-size:18px;">A</div>
+          <div class="founder-avatar" style="width:44px;height:44px;font-size:18px;">M</div>
+        </div>
         <div class="founder-role">⚡ Developer · SAI TECH</div>
         <p class="founder-bio">
           Developer and creator behind SAI TECH. Passionate about building real-world projects that solve real problems. Ghost Room is one of many experiments in privacy-first web development.<br><br>
           Always learning, always building — one project at a time.
         </p>
-        <div class="founder-links">
-          <a href="YOUR_INSTAGRAM_LINK" target="_blank" class="flink"><span class="flink-icon">📸</span> Instagram</a>
-          <a href="YOUR_LINKEDIN_LINK" target="_blank" class="flink"><span class="flink-icon">💼</span> LinkedIn</a>
-          <a href="YOUR_GITHUB_LINK" target="_blank" class="flink"><span class="flink-icon">💻</span> GitHub</a>
-          <a href="https://saiyam-creator.github.io/portfolio/" target="_blank" class="flink"><span class="flink-icon">🌐</span> Portfolio</a>
-        </div>
+        <div class="footer-socials">
+      <a href="https://www.instagram.com/saiiyam_jain/" target="_blank" class="fsoc" title="Instagram">📸</a>
+      <a href="https://www.linkedin.com/in/saiyam-jain-68094a292/" target="_blank" class="fsoc" title="LinkedIn">💼</a>
+      <a href="https://github.com/saiyam-creator" target="_blank" class="fsoc" title="GitHub">💻</a>
+      <a href="https://saiyam-creator.github.io/portfolio/" target="_blank" class="fsoc" title="Portfolio">🌐</a>
+    </div>
       </div>
     </div>
   </div>
@@ -1025,7 +1031,7 @@ document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeLb(); });
   document.addEventListener('mouseleave', () => { mouse.x = -999; mouse.y = -999; });
 
   // Speed per column — slower & varied
-  const speeds = Array(1000).fill(0).map(() => 0.2 + Math.random() * 0.22);
+  const speeds = Array(1000).fill(0).map(() => 0.12 + Math.random() * 0.22);
 
   function draw(ts) {
     requestAnimationFrame(draw);
