@@ -293,6 +293,7 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:999;ba
     <a href="https://saiyam-creator.github.io/portfolio/" target="_blank" class="saitech-link" style="font-size:20px;">⚡ GHOST ROOM</a>
     <div class="topnav-links">
       <a href="#features">Features</a>
+      <a href="#why">Why</a>
       <a href="#about">About</a>
       <a href="#founder">Founder</a>
     </div>
@@ -305,7 +306,7 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:999;ba
     <div style="position:absolute;top:20%;left:15%;width:320px;height:320px;background:radial-gradient(circle,rgba(0,255,135,0.07) 0%,transparent 70%);pointer-events:none;animation:orbFloat 6s ease-in-out infinite;"></div>
     <div style="position:absolute;bottom:25%;right:12%;width:260px;height:260px;background:radial-gradient(circle,rgba(0,196,255,0.06) 0%,transparent 70%);pointer-events:none;animation:orbFloat 8s ease-in-out infinite reverse;"></div>
     <div class="logo">GHOST ROOM</div>
-    <div class="logo-sub">ENCRYPTED · EPHEMERAL · UNTRACEABLE</div>
+    <div class="logo-sub">ANONYMOUS · EPHEMERAL · PRIVATE</div>
     <p class="tagline" style="margin:24px 0 44px;">Create a room. Share the key. <span>Chat freely.</span><br>When it's over — it vanishes. Forever.</p>
     <div class="lbtns">
       <button class="btn-primary" onclick="go('create')">⬡ Create Room</button>
@@ -315,7 +316,7 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:999;ba
       <div class="chip"><span class="dot"></span>Real-time</div>
       <div class="chip"><span class="dot r"></span>Self-Destruct</div>
       <div class="chip"><span class="dot y"></span>All Media</div>
-      <div class="chip"><span class="dot"></span>Zero Logs</div>
+      <div class="chip"><span class="dot"></span>Auto-Wipe</div>
       <div class="chip"><span class="dot"></span>No Signup</div>
     </div>
   </div>
@@ -334,7 +335,7 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:999;ba
   <div class="section" id="features">
     <div class="sec-label">FEATURES</div>
     <div class="sec-title">Everything you need.<br><span>Nothing you don't.</span></div>
-    <p class="sec-desc">Ghost Room is built for people who value privacy. No accounts, no history, no trace — just pure real-time communication.</p>
+    <p class="sec-desc">Ghost Room is built for people who value privacy. No accounts, no identity — just a key, a room, and a conversation that knows when to disappear.</p>
     <div class="feat-grid">
       <div class="feat-card">
         <span class="feat-icon">💬</span>
@@ -371,7 +372,66 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:999;ba
 
   <div class="sdiv"></div>
 
-  <!-- ABOUT + FOUNDER -->
+  <!-- WHY GHOST ROOM -->
+  <div class="section" id="why">
+    <div class="sec-label">WHY GHOST ROOM</div>
+    <div class="sec-title">Some conversations<br><span>shouldn't last forever.</span></div>
+    <p class="sec-desc">Most chat apps keep everything. Ghost Room was built to do the opposite.</p>
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:24px;margin-top:52px;">
+
+      <div style="display:flex;gap:18px;align-items:flex-start;padding:28px;background:var(--surface);border:1px solid var(--border);position:relative;overflow:hidden;">
+        <div style="font-size:28px;flex-shrink:0;">🚫</div>
+        <div>
+          <div style="font-family:'Space Mono',monospace;font-size:11px;color:var(--accent);letter-spacing:2px;margin-bottom:8px;">NO ACCOUNT NEEDED</div>
+          <div style="font-size:14px;color:var(--muted);line-height:1.7;">No email. No phone number. No profile. Just open the app, pick an alias, and you're in. Your identity stays yours.</div>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:18px;align-items:flex-start;padding:28px;background:var(--surface);border:1px solid var(--border);">
+        <div style="font-size:28px;flex-shrink:0;">💀</div>
+        <div>
+          <div style="font-family:'Space Mono',monospace;font-size:11px;color:var(--accent);letter-spacing:2px;margin-bottom:8px;">ROOMS SELF-DESTRUCT</div>
+          <div style="font-size:14px;color:var(--muted);line-height:1.7;">Set a timer or destroy manually. When a room is gone — messages are wiped and the room key stops working. No recovery, no archive.</div>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:18px;align-items:flex-start;padding:28px;background:var(--surface);border:1px solid var(--border);">
+        <div style="font-size:28px;flex-shrink:0;">🔑</div>
+        <div>
+          <div style="font-family:'Space Mono',monospace;font-size:11px;color:var(--accent);letter-spacing:2px;margin-bottom:8px;">ACCESS BY KEY ONLY</div>
+          <div style="font-size:14px;color:var(--muted);line-height:1.7;">Every room has a unique 8-character key. Without the key, nobody can find or enter your room — not even by accident.</div>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:18px;align-items:flex-start;padding:28px;background:var(--surface);border:1px solid var(--border);">
+        <div style="font-size:28px;flex-shrink:0;">👻</div>
+        <div>
+          <div style="font-family:'Space Mono',monospace;font-size:11px;color:var(--accent);letter-spacing:2px;margin-bottom:8px;">ANONYMOUS ALIASES</div>
+          <div style="font-size:14px;color:var(--muted);line-height:1.7;">Pick any name you want — Ghost_42, Shadow_99, anything. No real name, no link to your identity. Just a name for the session.</div>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:18px;align-items:flex-start;padding:28px;background:var(--surface);border:1px solid var(--border);">
+        <div style="font-size:28px;flex-shrink:0;">📦</div>
+        <div>
+          <div style="font-family:'Space Mono',monospace;font-size:11px;color:var(--accent);letter-spacing:2px;margin-bottom:8px;">SHARE ANYTHING</div>
+          <div style="font-size:14px;color:var(--muted);line-height:1.7;">Images, videos, documents, voice notes — all shareable inside the room. Everything gets wiped when the room self-destructs.</div>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:18px;align-items:flex-start;padding:28px;background:var(--surface);border:1px solid var(--border);">
+        <div style="font-size:28px;flex-shrink:0;">⚡</div>
+        <div>
+          <div style="font-family:'Space Mono',monospace;font-size:11px;color:var(--accent);letter-spacing:2px;margin-bottom:8px;">INSTANT & REAL-TIME</div>
+          <div style="font-size:14px;color:var(--muted);line-height:1.7;">Messages appear instantly for everyone in the room. No refresh, no delay — live communication the way it should be.</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="sdiv"></div>
   <div class="section" id="about">
     <div class="sec-label">ABOUT</div>
     <div class="sec-title">Built for <span>privacy.</span><br>Designed to vanish.</div>
@@ -379,9 +439,9 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:999;ba
       <div class="about-card">
         <div class="about-tag">// THE APP</div>
         <p class="about-text">
-          <strong>Ghost Room</strong> is an anonymous, ephemeral real-time chat application. It was built with one goal — let people communicate freely without leaving any digital footprint.<br><br>
-          There are no accounts, no servers storing your data permanently, and no way to trace conversations back to you. Create a room, share the key, chat — and when you're done, destroy it.<br><br>
-          Powered by <strong>Supabase</strong> for real-time database and file storage. Zero backend, zero framework, zero complexity.
+          <strong>Ghost Room</strong> is an anonymous, ephemeral real-time chat application. Built for people who believe conversations should have an expiry date.<br><br>
+          No accounts. No usernames tied to you. Just an alias, a room key, and a chat that self-destructs when you're done. Once a room is destroyed — messages are wiped and access is gone.<br><br>
+          Designed with a <strong>privacy-first mindset</strong> — the less you leave behind, the better.
         </p>
         <div class="tech-row">
           <div class="tech-pill">JavaScript</div>
@@ -408,7 +468,7 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:999;ba
           Developer and creator behind SAI TECH. Passionate about building real-world projects that solve real problems. Ghost Room is one of many experiments in privacy-first web development.<br><br>
           Always learning, always building — one project at a time.
         </p>
-        <div class="footer-socials">
+         <div class="footer-socials">
       <a href="https://www.instagram.com/saiiyam_jain/" target="_blank" class="fsoc" title="Instagram">📸</a>
       <a href="https://www.linkedin.com/in/saiyam-jain-68094a292/" target="_blank" class="fsoc" title="LinkedIn">💼</a>
       <a href="https://github.com/saiyam-creator" target="_blank" class="fsoc" title="GitHub">💻</a>
@@ -424,7 +484,7 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:999;ba
   <div class="cta-section">
     <div class="cta-glow"></div>
     <div class="cta-title">Ready to<br><span>disappear?</span></div>
-    <div class="cta-sub">// no signup required · rooms self-destruct · zero traces</div>
+    <div class="cta-sub">// no signup required · rooms self-destruct · anonymous by design</div>
     <div class="lbtns">
       <button class="btn-primary" onclick="go('create')" style="padding:16px 48px;font-size:14px;">⬡ Create A Room</button>
       <button class="btn-outline" onclick="go('join')" style="padding:15px 48px;font-size:14px;">◈ Join A Room</button>
@@ -435,12 +495,12 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:999;ba
   <footer class="footer">
     <div>
       <a href="https://saiyam-creator.github.io/portfolio/" target="_blank" class="saitech-link" style="font-size:18px;">⚡ SAI TECH</a>
-      <div class="footer-copy" style="margin-top:6px;">© 2025 Ghost Room · Built by Saiyam · All data self-destructs</div>
+      <div class="footer-copy" style="margin-top:6px;">© 2025 Ghost Room · Built by Saiyam · Rooms self-destruct by design</div>
     </div>
-    <div class="footer-socials">
-      <a href="YOUR_INSTAGRAM_LINK" target="_blank" class="fsoc" title="Instagram">📸</a>
-      <a href="YOUR_LINKEDIN_LINK" target="_blank" class="fsoc" title="LinkedIn">💼</a>
-      <a href="YOUR_GITHUB_LINK" target="_blank" class="fsoc" title="GitHub">💻</a>
+      <div class="footer-socials">
+      <a href="https://www.instagram.com/saiiyam_jain/" target="_blank" class="fsoc" title="Instagram">📸</a>
+      <a href="https://www.linkedin.com/in/saiyam-jain-68094a292/" target="_blank" class="fsoc" title="LinkedIn">💼</a>
+      <a href="https://github.com/saiyam-creator" target="_blank" class="fsoc" title="GitHub">💻</a>
       <a href="https://saiyam-creator.github.io/portfolio/" target="_blank" class="fsoc" title="Portfolio">🌐</a>
     </div>
   </footer>
@@ -820,7 +880,7 @@ async function uploadFile(e, type) {
     return;
   }
 
-  // Get public URL
+  // Direct public URL — works everywhere (local + hosted)
   const { data:urlData } = sb.storage.from(BUCKET).getPublicUrl(filePath);
   const url = urlData.publicUrl;
 
@@ -875,13 +935,17 @@ async function toggleRec() {
       if (error) { toast('Voice failed: '+error.message, true); return; }
 
       const { data:urlData } = sb.storage.from(BUCKET).getPublicUrl(filePath);
-      await pushMsg({ type:'audio', content:urlData.publicUrl, duration:dur });
+      const voiceUrl = urlData.publicUrl;
+      await pushMsg({ type:'audio', content:voiceUrl, duration:dur });
       toast('Voice sent ✓');
     };
     S.recorder.start();
     S.rec=true; g('micBtn').classList.add('recording'); g('recbar').classList.add('on');
     S.rInt = setInterval(() => { S.rSecs++; g('rectime').textContent=ftD(S.rSecs); }, 1000);
-  } catch(e) { toast('Mic access denied', true); }
+  } catch(e) {
+    const isLocal = location.protocol === 'file:';
+    toast(isLocal ? 'Mic needs HTTPS — GitHub Pages pe test karo!' : 'Mic access denied', true);
+  }
 }
 function stopRec() {
   if(!S.rec) return;
